@@ -1,9 +1,12 @@
 package local.interviews.homework.exercise;
 
-import org.springframework.stereotype.Service;
-
 import java.util.Objects;
 import java.util.stream.Stream;
+
+import org.springframework.stereotype.Service;
+
+import local.interviews.homework.exercise.exceptions.FileUploadException;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Заготовка для реализации (можно менять все и указывать причину изменения)
@@ -11,20 +14,21 @@ import java.util.stream.Stream;
  * Проверка через тесты
  */
 @Service
-public class ValidateServiceImpl implements UploadService {
+@RequiredArgsConstructor
+public class UploadServiceImpl implements UploadService {
+    
     private final StoreImpl store = new StoreImpl();
-
+    private ValidatorService validationService;
+    
     @Override
     public Stream<Integer> upload(Stream<Byte> data) {
-        return store.save(validate(data));
+        try {
+            return store.save(validationService.validate(data));
+        } catch (Exception e) {
+            throw new FileUploadException(e);
+        }
     }
-
-    public Stream<Byte> validate(Stream<Byte> data) {
-        //в примере валидация JPEG не реализована
-        //для теста подойдет упрощенная валидация, если первые 2 байта потока равны 0xff, 0xd8 (JPEG SOI marker)
-        return data;
-    }
-
+    
     public static class StoreImpl {
         public Stream<Integer> save(Stream<Byte> data) {
             //тут саму реализацию сохранения в хранилище не реализуем,
