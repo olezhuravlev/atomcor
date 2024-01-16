@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import local.interviews.homework.exercise.ValidatorService;
+import local.interviews.homework.exercise.validators.ValidatorService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 

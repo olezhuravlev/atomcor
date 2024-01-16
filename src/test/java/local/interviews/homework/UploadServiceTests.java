@@ -1,24 +1,21 @@
 package local.interviews.homework;
 
-import java.util.Arrays;
-import java.util.stream.Stream;
-
+import local.interviews.homework.exercise.UploadService;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import local.interviews.homework.exercise.UploadService;
-import local.interviews.homework.exercise.ValidatorService;
-import lombok.RequiredArgsConstructor;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 @SpringBootTest
-@RequiredArgsConstructor(onConstructor_ = { @Autowired })
+@RequiredArgsConstructor(onConstructor_ ={@Autowired})
 public class UploadServiceTests extends AbstractServiceTest {
-    
     private final UploadService uploadService;
-    
+
     private static final Byte[] invalid = new Byte[200];
     private static final Byte[] jpeg2400b = new Byte[2400];
     private static final Byte[] jpeg4096b = new Byte[4096];
@@ -26,54 +23,68 @@ public class UploadServiceTests extends AbstractServiceTest {
     private static final Byte[] jpeg1mPlus = new Byte[1024 * 1024 + 1];
     private static final Integer[] ref1mOutput = new Integer[1024];
     
+    private static final Byte[] jpeg400b = new Byte[400];
+    private static final Integer[] jpeg400bExpected = new Integer[1];
+
     @BeforeAll
     public static void beforeAll() {
         
-        Arrays.fill(invalid, (byte) 0x00);
+        Arrays.fill(jpeg400b, (byte) 0x00);
+        makeJpegHeader(jpeg400b);
         
         Arrays.fill(jpeg2400b, (byte) 0x00);
         makeJpegHeader(jpeg2400b);
-        
+
         Arrays.fill(jpeg4096b, (byte) 0x00);
         makeJpegHeader(jpeg4096b);
-        
+
+        Arrays.fill(invalid, (byte) 0x00);
+
         Arrays.fill(jpeg1m, (byte) 0x00);
         makeJpegHeader(jpeg1m);
-        
+
         Arrays.fill(jpeg1mPlus, (byte) 0x00);
         makeJpegHeader(jpeg1mPlus);
-        
+ 
         Arrays.setAll(ref1mOutput, (i) -> 1024 * (i + 1));
+        
+        jpeg400bExpected[0] = 400;
+    }
+    
+    @Test
+    public void test400bJpeg() {
+        Assertions.assertArrayEquals(jpeg400bExpected, uploadService.upload(Arrays.stream(jpeg400b))
+            .toArray(Integer[]::new));
     }
     
     @Test
     public void test1mbJpeg() {
-        Integer[] arr = uploadService.upload(Arrays.stream(jpeg1m)).toArray(Integer[]::new);
-        Assertions.assertArrayEquals(ref1mOutput, arr);
+        Assertions.assertArrayEquals(ref1mOutput, uploadService.upload(Arrays.stream(jpeg1m))
+                .toArray(Integer[]::new));
     }
-    
+
     @Test
     public void test2400bJpeg() {
-        Assertions.assertArrayEquals(new Integer[] { 1024, 2048, 2400 },
-            uploadService.upload(Arrays.stream(jpeg2400b)).toArray(Integer[]::new));
+        Assertions.assertArrayEquals(new Integer[]{1024, 2048, 2400}, uploadService.upload(Arrays.stream(jpeg2400b))
+                .toArray(Integer[]::new));
     }
-    
+
     @Test
     public void test4096bJpeg() {
-        Assertions.assertArrayEquals(new Integer[] { 1024, 2048, 3072, 4096 },
-            uploadService.upload(Arrays.stream(jpeg4096b)).toArray(Integer[]::new));
+        Assertions.assertArrayEquals(new Integer[]{1024, 2048, 3072, 4096}, uploadService.upload(Arrays.stream(jpeg4096b))
+                .toArray(Integer[]::new));
     }
-    
+
     @Test
     public void testJpegInvalid() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> uploadService.upload(Arrays.stream(invalid)).count());
     }
-    
+
     @Test
     public void test1mbPlusJpeg() {
         Assertions.assertThrows(IllegalStateException.class, () -> uploadService.upload(Arrays.stream(jpeg1mPlus)).count());
     }
-    
+
     @Test
     public void testEmpty() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> uploadService.upload(Stream.empty()).count());
