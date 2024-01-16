@@ -43,7 +43,7 @@ public class JpegValidatorTest extends AbstractServiceTest {
     @SneakyThrows
     public void validateIsEmpty() {
         
-        List<Byte> jpegBytes = validator.validate(Arrays.stream(empty)).map(byteHolder -> byteHolder.getAByte())
+        List<Byte> jpegBytes = validator.validate(Arrays.stream(empty)).map(byteArr -> byteArr[0])
             .collect(Collectors.toList());
         Byte[] expected = new Byte[1];
         assertEquals(Arrays.asList(expected), jpegBytes);
@@ -63,10 +63,10 @@ public class JpegValidatorTest extends AbstractServiceTest {
     @SneakyThrows
     public void validateIsJpeg() {
         
-        List<Byte> jpegBytes = validator.validate(Arrays.stream(jpeg)).map(byteHolder -> byteHolder.getAByte())
-            .collect(Collectors.toList());
         Byte[] expected = new Byte[3];
         makeJpegHeader(expected);
+        
+        List<Byte> jpegBytes = validator.validate(Arrays.stream(jpeg)).map(byteArr -> byteArr[0]).collect(Collectors.toList());
         assertEquals(Arrays.asList(expected), jpegBytes);
     }
     

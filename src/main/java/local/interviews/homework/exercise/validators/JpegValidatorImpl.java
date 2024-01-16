@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
-import local.interviews.homework.exercise.DataHolder;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -25,20 +24,23 @@ public class JpegValidatorImpl implements Validator {
     private final MessageSource messageSource;
     
     @Override
-    public Stream<DataHolder> validate(Stream<Byte> data) {
+    public Stream<Byte[]> validate(Stream<Byte> data) {
         
         AtomicInteger idx = new AtomicInteger();
         
-        return Stream.concat(data.sequential().map(aByte -> new DataHolder(idx.incrementAndGet(), aByte, false)).peek(dataHolder -> {
-            if (dataHolder.getSequenceNumber() == 1 && !jpegMarker[0].equals(dataHolder.getAByte())) {
-                throw new IllegalArgumentException(messageSource.getMessage(UNKNOWN_DATA_STREAM_FORMAT_MESSAGE, null, Locale.ENGLISH));
-            }
-            if (dataHolder.getSequenceNumber() == 2 && !jpegMarker[1].equals(dataHolder.getAByte())) {
-                throw new IllegalArgumentException(messageSource.getMessage(UNKNOWN_DATA_STREAM_FORMAT_MESSAGE, null, Locale.ENGLISH));
-            }
-            if (dataHolder.getSequenceNumber() > streamLengthMax) {
-                throw new IllegalStateException(messageSource.getMessage(DATA_STREAM_TOO_LONG_MESSAGE, null, Locale.ENGLISH));
-            }
-        }), Stream.of(new DataHolder(0, null, true)));
+        return Stream.concat(data.sequential()
+            .map(aByte -> new Byte[] {aByte, 0})
+            .peek(byteArr -> {
+                idx.incrementAndGet();
+                if (idx.get() == 1 && !jpegMarker[0].equals(byteArr[0])) {
+                    throw new IllegalArgumentException(messageSource.getMessage(UNKNOWN_DATA_STREAM_FORMAT_MESSAGE, null, Locale.ENGLISH));
+                }
+                if (idx.get() == 2 && !jpegMarker[1].equals(byteArr[0])) {
+                    throw new IllegalArgumentException(messageSource.getMessage(UNKNOWN_DATA_STREAM_FORMAT_MESSAGE, null, Locale.ENGLISH));
+                }
+                if (idx.get() > streamLengthMax) {
+                    throw new IllegalStateException(messageSource.getMessage(DATA_STREAM_TOO_LONG_MESSAGE, null, Locale.ENGLISH));
+                }
+            }), Stream.of((byte) 0x1).map(endFlag -> new Byte[] {null, endFlag}));
     }
 }

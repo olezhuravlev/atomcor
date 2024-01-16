@@ -30,38 +30,36 @@ public class UploadServiceImpl implements UploadService {
         }
     }
     
-    private Stream<Integer> save(Stream<DataHolder> data) {
+    private Stream<Integer> save(Stream<Byte[]> data) {
         //тут саму реализацию сохранения в хранилище не реализуем,
         //только имитацию ответа на каждый килобайт данных в исходящий стрим 1024, 2048 итд...
         
         Objects.requireNonNull(data);
         
-        AtomicInteger lastSequenceNumber = new AtomicInteger();
+        AtomicInteger counter = new AtomicInteger();
         AtomicBoolean dataDetected = new AtomicBoolean();
         
-        return data.sequential().map(dataHolder -> {
+        return data.sequential().map(byteArr -> {
             
-            int sequenceNumber = dataHolder.getSequenceNumber();
+            int count = counter.incrementAndGet();
             
-            if (dataHolder.isEnd()) {
+            if (byteArr[1] == 1) {
                 
                 if (dataDetected.get() == false) {
                     throw new IllegalArgumentException(messageSource.getMessage(EMPTY_STREAM_FORMAT_MESSAGE, null, Locale.ENGLISH));
                 }
                 
-                int lastSeqNum = lastSequenceNumber.get();
-                if (lastSeqNum % 1024 == 0) {
+                if ((count - 1) % 1024 == 0) {
                     return null;
                 } else {
-                    return lastSeqNum;
+                    return count - 1;
                 }
             }
             
             dataDetected.set(true);
-            lastSequenceNumber.set(sequenceNumber);
             
-            if (sequenceNumber % 1024 == 0) {
-                return sequenceNumber;
+            if (count % 1024 == 0) {
+                return count;
             }
             
             return null;
