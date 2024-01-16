@@ -4,6 +4,6 @@ import java.util.stream.Stream;
 
 import local.interviews.homework.exercise.DataHolder;
 
-public interface ValidatorService {
+public interface Validator {
     Stream<DataHolder> validate(Stream<Byte> data) throws Exception;
 }

@@ -12,15 +12,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import local.interviews.homework.exercise.validators.ValidatorService;
+import local.interviews.homework.exercise.validators.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = { @Autowired })
-public class JpegValidatorServiceTest extends AbstractServiceTest {
+public class JpegValidatorTest extends AbstractServiceTest {
     
-    private final ValidatorService validatorService;
+    private final Validator validator;
     
     private static final Byte[] empty = new Byte[0];
     private static final Byte[] notJpeg = new Byte[2];
@@ -43,7 +43,7 @@ public class JpegValidatorServiceTest extends AbstractServiceTest {
     @SneakyThrows
     public void validateIsEmpty() {
         
-        List<Byte> jpegBytes = validatorService.validate(Arrays.stream(empty)).map(byteHolder -> byteHolder.getAByte())
+        List<Byte> jpegBytes = validator.validate(Arrays.stream(empty)).map(byteHolder -> byteHolder.getAByte())
             .collect(Collectors.toList());
         Byte[] expected = new Byte[1];
         assertEquals(Arrays.asList(expected), jpegBytes);
@@ -53,7 +53,7 @@ public class JpegValidatorServiceTest extends AbstractServiceTest {
     public void validateIsNotJpeg() {
         
         IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            validatorService.validate(Arrays.stream(notJpeg)).collect(Collectors.toList());
+            validator.validate(Arrays.stream(notJpeg)).collect(Collectors.toList());
         });
         
         assertEquals("Unknown data stream format", exception.getMessage());
@@ -63,7 +63,7 @@ public class JpegValidatorServiceTest extends AbstractServiceTest {
     @SneakyThrows
     public void validateIsJpeg() {
         
-        List<Byte> jpegBytes = validatorService.validate(Arrays.stream(jpeg)).map(byteHolder -> byteHolder.getAByte())
+        List<Byte> jpegBytes = validator.validate(Arrays.stream(jpeg)).map(byteHolder -> byteHolder.getAByte())
             .collect(Collectors.toList());
         Byte[] expected = new Byte[3];
         makeJpegHeader(expected);
@@ -73,7 +73,7 @@ public class JpegValidatorServiceTest extends AbstractServiceTest {
     @Test
     public void validateIsTooLong() {
         IllegalStateException exception = Assertions.assertThrows(IllegalStateException.class, () -> {
-            validatorService.validate(Arrays.stream(tooLongJpeg)).collect(Collectors.toList());
+            validator.validate(Arrays.stream(tooLongJpeg)).collect(Collectors.toList());
         });
         assertEquals("Data stream is too long", exception.getMessage());
     }

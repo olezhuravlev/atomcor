@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
-import local.interviews.homework.exercise.validators.ValidatorService;
+import local.interviews.homework.exercise.validators.Validator;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -18,13 +18,13 @@ public class UploadServiceImpl implements UploadService {
     
     private final static String EMPTY_STREAM_FORMAT_MESSAGE = "empty-stream";
 
-    private final ValidatorService validationService;
+    private final Validator validator;
     private final MessageSource messageSource;
     
     @Override
     public Stream<Integer> upload(Stream<Byte> data) {
         try {
-            return save(validationService.validate(data));
+            return save(validator.validate(data));
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }

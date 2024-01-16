@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class JpegValidatorServiceImpl implements ValidatorService {
+public class JpegValidatorImpl implements Validator {
     
     private final static String UNKNOWN_DATA_STREAM_FORMAT_MESSAGE = "unknown-data-stream-format";
     private final static String DATA_STREAM_TOO_LONG_MESSAGE = "data-stream-too-long";
@@ -25,7 +25,7 @@ public class JpegValidatorServiceImpl implements ValidatorService {
     private final MessageSource messageSource;
     
     @Override
-    public Stream<DataHolder> validate(Stream<Byte> data) throws Exception {
+    public Stream<DataHolder> validate(Stream<Byte> data) {
         
         AtomicInteger idx = new AtomicInteger();
         
