@@ -30,7 +30,7 @@ public class UploadServiceImpl implements UploadService {
         }
     }
     
-    private Stream<Integer> save(Stream<Byte[]> data) {
+    private Stream<Integer> save(Stream<Byte> data) {
         //тут саму реализацию сохранения в хранилище не реализуем,
         //только имитацию ответа на каждый килобайт данных в исходящий стрим 1024, 2048 итд...
         
@@ -39,11 +39,11 @@ public class UploadServiceImpl implements UploadService {
         AtomicInteger counter = new AtomicInteger();
         AtomicBoolean dataDetected = new AtomicBoolean();
         
-        return data.sequential().map(byteArr -> {
+        return data.sequential().map(aByte -> {
             
             int count = counter.incrementAndGet();
             
-            if (byteArr[1] == 1) {
+            if (aByte == null) {
                 
                 if (dataDetected.get() == false) {
                     throw new IllegalArgumentException(messageSource.getMessage(EMPTY_STREAM_FORMAT_MESSAGE, null, Locale.ENGLISH));

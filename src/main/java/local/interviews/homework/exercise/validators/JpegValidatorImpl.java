@@ -24,23 +24,22 @@ public class JpegValidatorImpl implements Validator {
     private final MessageSource messageSource;
     
     @Override
-    public Stream<Byte[]> validate(Stream<Byte> data) {
+    public Stream<Byte> validate(Stream<Byte> data) {
         
         AtomicInteger idx = new AtomicInteger();
         
         return Stream.concat(data.sequential()
-            .map(aByte -> new Byte[] {aByte, 0})
-            .peek(byteArr -> {
+            .peek(aByte -> {
                 idx.incrementAndGet();
-                if (idx.get() == 1 && !jpegMarker[0].equals(byteArr[0])) {
+                if (idx.get() == 1 && !jpegMarker[0].equals(aByte)) {
                     throw new IllegalArgumentException(messageSource.getMessage(UNKNOWN_DATA_STREAM_FORMAT_MESSAGE, null, Locale.ENGLISH));
                 }
-                if (idx.get() == 2 && !jpegMarker[1].equals(byteArr[0])) {
+                if (idx.get() == 2 && !jpegMarker[1].equals(aByte)) {
                     throw new IllegalArgumentException(messageSource.getMessage(UNKNOWN_DATA_STREAM_FORMAT_MESSAGE, null, Locale.ENGLISH));
                 }
                 if (idx.get() > streamLengthMax) {
                     throw new IllegalStateException(messageSource.getMessage(DATA_STREAM_TOO_LONG_MESSAGE, null, Locale.ENGLISH));
                 }
-            }), Stream.of((byte) 0x1).map(endFlag -> new Byte[] {null, endFlag}));
+            }), Stream.of(new Byte[] { null }));
     }
 }
